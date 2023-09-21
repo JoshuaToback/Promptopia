@@ -2,15 +2,13 @@
 
 import { useState, useEffect } from "react";
 
-import Promptcard from "./PromptCard";
-
-const project = "promptopia";
+import PromptCard from "./PromptCard";
 
 const PromptCardList = ({ data, handleTagClick }) => {
   return (
-    <div className="mt-10 prompt_layout">
+    <div className='mt-16 prompt_layout'>
       {data.map((post) => (
-        <Promptcard
+        <PromptCard
           key={post._id}
           post={post}
           handleTagClick={handleTagClick}
@@ -21,42 +19,29 @@ const PromptCardList = ({ data, handleTagClick }) => {
 };
 
 const Feed = () => {
+  const [allPosts, setAllPosts] = useState([]);
+
+  // Search states
   const [searchText, setSearchText] = useState("");
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [searchTimeout, setSearchTimeout] = useState(null);
   const [searchedResults, setSearchedResults] = useState([]);
 
+  const fetchPosts = async () => {
+    const response = await fetch("/api/prompt");
+    const data = await response.json();
+
+    setAllPosts(data);
+  };
+
   useEffect(() => {
-    const fetchPosts = async () => {
-try {
-  setLoading(true);
-  const response = await fetch(`/api/prompts/${project}/prompts`, {
-    method: "GET",
-    cache: "no-cache",
-    next: { revalidate: 60 },
-  });
-  
-  const data = await response.json();
-  
-  setPosts(data);
-  setLoading(false);
-  
-} catch (error) {
-  console.log(error)
-}
-
-};
-
-fetchPosts();
-
+    fetchPosts();
   }, []);
 
   const filterPrompts = (searchtext) => {
-    const regex = new RegExp(searchtext, "i"); 
-    return posts.filter(
+    const regex = new RegExp(searchtext, "i"); // 'i' flag for case-insensitive search
+    return allPosts.filter(
       (item) =>
-        regex.test(item.username) ||
+        regex.test(item.creator.username) ||
         regex.test(item.tag) ||
         regex.test(item.prompt)
     );
@@ -66,6 +51,7 @@ fetchPosts();
     clearTimeout(searchTimeout);
     setSearchText(e.target.value);
 
+    // debounce method
     setSearchTimeout(
       setTimeout(() => {
         const searchResult = filterPrompts(e.target.value);
@@ -82,25 +68,26 @@ fetchPosts();
   };
 
   return (
-    <section className="feed">
-      <form className="relative w-full flex-center">
+    <section className='feed'>
+      <form className='relative w-full flex-center'>
         <input
-          type="text"
-          placeholder="Search for a word, a tag or a username!"
+          type='text'
+          placeholder='Search for a tag or a username'
           value={searchText}
           onChange={handleSearchChange}
           required
-          className="search_input peer"
+          className='search_input peer'
         />
       </form>
-      {loading && <Spinner />}
+
+      {/* All Prompts */}
       {searchText ? (
         <PromptCardList
           data={searchedResults}
           handleTagClick={handleTagClick}
         />
       ) : (
-        <PromptCardList data={posts} handleTagClick={handleTagClick} />
+        <PromptCardList data={allPosts} handleTagClick={handleTagClick} />
       )}
     </section>
   );

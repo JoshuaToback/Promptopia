@@ -2,7 +2,7 @@
 
 Want a place to write down your ideas for AI prompts and share them with others? Promptopia is the place for you!
 
-Check out the deployed site [here](https://promptopia-ystep5fb9-joshuatoback.vercel.app/)!
+Check out the deployed site [here](https://promptopia-joshuatoback.vercel.app/)!
 
 ## How Does It Work?
 
